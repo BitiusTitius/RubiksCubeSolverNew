@@ -23,11 +23,11 @@ public class RubiksCube {
         {2, 1, 0,     36, 39, 42,  35, 34, 33, 17, 14, 11}
     };
 
-    public RubiksCube() {
+    public RubiksCube() { // Create an unscrambled Rubiks cube
         this.state = SOLVED_STATE.clone();
     }
 
-    public RubiksCube(int[] state) {
+    public RubiksCube(int[] state) { // Create a Rubiks cube with a predetermined scramble
         if (state.length != 54) {
             throw new IllegalArgumentException("State must have 54 elements.");
         }
@@ -35,7 +35,7 @@ public class RubiksCube {
         this.state = state.clone();
     }
 
-    public void rotateFace(int face, int direction) {
+    public void rotateFace(int face, int direction) { // Rotates face. 0 for up, 1 for right, 2 for front, 3 for down, 4 for left, 5 for back; direction: 1 for clockwise, -1 for counter-clockwise
         rotateFaceOnly(face, direction);
         rotateAdjacentSides(face, direction);
 
