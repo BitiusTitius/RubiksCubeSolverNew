@@ -1,59 +1,51 @@
 package rubikscubesolvernew;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.*;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
-import javafx.scene.transform.Rotate;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
-    private double mouseX, mouseY;
-    private final Rotate rotateX = new Rotate(25, Rotate.X_AXIS);
-    private final Rotate rotateY = new Rotate(-35, Rotate.Y_AXIS);
-
     @Override
-    public void start(Stage stage) {
-        RubiksCube cube = new RubiksCube(); // creates a solved cube by default
-        Cube visual = new Cube(cube.getState()); // pass your 1D array
+    public void start(Stage primaryStage) {
+        int[] scramble = {5, 5, 3, 1, 1, 6, 1, 1, 5, 3, 2, 2, 1, 2, 2, 1, 2, 2, 3, 3, 1, 3, 3, 1, 4, 4, 1, 4, 4, 2, 4, 4, 3, 5, 5, 6, 4, 2, 2, 4, 5, 5, 6, 5, 5, 4, 3, 3, 6, 6, 6, 6, 6, 6};
+        // 1. Initialize your Rubik's Cube core logic
+        RubiksCube cube = new RubiksCube(scramble);
 
-        Group root = new Group(visual);
-        root.getTransforms().addAll(rotateX, rotateY);
+        // 2. Create the main UI layout window
+        BorderPane root = new BorderPane();
 
-        // Add lighting to illuminate all faces
-        AmbientLight ambient = new AmbientLight(Color.color(0.6, 0.6, 0.6));
-        PointLight light1 = new PointLight(Color.WHITE);
-        light1.setTranslateX(5);
-        light1.setTranslateY(-5);
-        light1.setTranslateZ(-5);
-        PointLight light2 = new PointLight(Color.color(0.8, 0.8, 0.8));
-        light2.setTranslateX(-5);
-        light2.setTranslateY(5);
-        light2.setTranslateZ(5);
-        root.getChildren().addAll(ambient, light1, light2);
+        // 3. Extract the 3D visual component from the cube and put it in the center
+        root.setCenter(cube.getCube3D());
 
-        // Mouse drag to rotate the whole cube
-        SubScene sub = new SubScene(root, 600, 600, true, SceneAntialiasing.BALANCED);
-        sub.setFill(Color.DARKGRAY);
+        // 4. Create a button control panel for testing standard notations (U, R, F, etc.)
+        FlowPane buttonPanel = new FlowPane();
+        buttonPanel.setAlignment(Pos.CENTER);
+        buttonPanel.setHgap(10);
+        buttonPanel.setVgap(10);
+        buttonPanel.setStyle("-fx-padding: 20; -fx-background-color: #333333;");
 
-        PerspectiveCamera cam = new PerspectiveCamera(true);
-        cam.setTranslateZ(-8);
-        sub.setCamera(cam);
+        // Loop through your NOTATIONS array to dynamically generate buttons
+        for (String notation : RubiksCube.NOTATIONS) {
+            Button btn = new Button(notation);
+            btn.setStyle("-fx-font-size: 14px; -fx-min-width: 50px;");
+            
+            // When clicked, rotate the logic cube (which automatically refreshes the 3D view)
+            btn.setOnAction(e -> cube.rotateFace(notation));
+            buttonPanel.getChildren().add(btn);
+        }
 
-        sub.setOnMousePressed(e -> { mouseX = e.getSceneX(); mouseY = e.getSceneY(); });
-        sub.setOnMouseDragged(e -> {
-            rotateY.setAngle(rotateY.getAngle() + (e.getSceneX() - mouseX) * 0.3);
-            rotateX.setAngle(rotateX.getAngle() - (e.getSceneY() - mouseY) * 0.3);
-            mouseX = e.getSceneX(); mouseY = e.getSceneY();
-        });
+        root.setBottom(buttonPanel);
 
-        Scene scene = new Scene(new Group(sub));
-        stage.setScene(scene);
-        stage.setTitle("Rubik's Cube Solver");
-        stage.setWidth(700);
-        stage.setHeight(700);
-        stage.show();
+        // 5. Setup and display the window stage
+        Scene scene = new Scene(root, 900, 700);
+        primaryStage.setTitle("3D Rubik's Cube Simulator");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) { launch(args); }

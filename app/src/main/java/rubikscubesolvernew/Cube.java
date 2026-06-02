@@ -1,16 +1,19 @@
 package rubikscubesolvernew;
 
 import javafx.scene.Group;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Box;
+import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
+import javafx.scene.PerspectiveCamera;
 
-public class Cube extends Group {
-
-    private static final double SPACING = 1.05; // slight gap between cubies
-
-    // State values 1-6 map to: Up, Right, Front, Down, Left, Back
-    // FACE_COLORS indexed by (value - 1)
+public class Cube extends StackPane {
     private static final Color[] FACE_COLORS = {
+        Color.BLACK,  // value 0: internal (not visible)
         Color.WHITE,  // value 1: Up
         Color.RED,    // value 2: Right
         Color.GREEN,  // value 3: Front
@@ -18,75 +21,107 @@ public class Cube extends Group {
         Color.ORANGE, // value 5: Left
         Color.BLUE    // value 6: Back
     };
-
-    private Cubie[][][] cubies = new Cubie[3][3][3];
+    private Group cubeGroup;
 
     public Cube() {
-        buildCube(RubiksCube.SOLVED_STATE);
-    }
+        cubeGroup = new Group();
+        PerspectiveCamera camera = new PerspectiveCamera(true);
+        camera.setTranslateZ(-15);
 
-    public Cube(int[] state) {
-        buildCube(state);
+        SubScene subScene = new SubScene(cubeGroup, 800, 600, true, SceneAntialiasing.BALANCED);
+        subScene.setCamera(camera);
+        subScene.setFill(Color.GRAY);
+
+        initMouseControl(cubeGroup, subScene);
+
+        this.getChildren().add(subScene);
     }
 
     public void buildCube(int[] state) {
-        // x: Left→Right (0=Left, 2=Right)
-        // y: Top→Bottom (0=Up,   2=Down)
-        // z: Front→Back (0=Front,2=Back)
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 3; y++) {
-                for (int z = 0; z < 3; z++) {
-                    Color[] faceColors = resolveFaceColors(x, y, z, state);
-                    Cubie cubie = new Cubie(faceColors);
+        cubeGroup.getChildren().clear();
 
-                    // Center the whole cube at origin
-                    double tx = (x - 1) * SPACING;
-                    double ty = (y - 1) * SPACING;
-                    double tz = (z - 1) * SPACING;
-                    cubie.getTransforms().add(new Translate(tx, ty, tz));
+        double tileSize = 0.95;
+        double offset = 1.0;
 
-                    cubies[x][y][z] = cubie;
-                    getChildren().add(cubie);
-                }
+        for (int i = 0; i < 54; i++) {
+            int face = i / 9;
+            int positionOnFace = i % 9;
+            
+            // Calculate grid x, y on a 2D face (-1, 0, 1)
+            int row = positionOnFace / 3 - 1;
+            int col = positionOnFace % 3 - 1;
+
+            // Create a thin box to act as a colored tile
+            Box tile = new Box(tileSize, tileSize, 0.05); 
+            PhongMaterial material = new PhongMaterial(FACE_COLORS[state[i]]);
+            tile.setMaterial(material);
+
+            // Position and rotate the tile based on which face it belongs to
+            Translate translate = new Translate();
+            Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
+            Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
+
+            // Map face index to 3D space
+            switch (face) {
+                case 0: // Up (White) - facing -Y
+                    translate.setX(col * offset);
+                    translate.setY(-1.5 * offset);
+                    translate.setZ(row * offset);
+                    rotateX.setAngle(90);
+                    break;
+                case 1: // Right (Red) - facing +X
+                    translate.setX(1.5 * offset);
+                    translate.setY(row * offset);
+                    translate.setZ(-col * offset); // Reverse Z to match standard mapping
+                    rotateY.setAngle(90);
+                    break;
+                case 2: // Front (Green) - facing -Z
+                    translate.setX(col * offset);
+                    translate.setY(row * offset);
+                    translate.setZ(-1.5 * offset);
+                    break;
+                case 3: // Down (Yellow) - facing +Y
+                    translate.setX(col * offset);
+                    translate.setY(1.5 * offset);
+                    translate.setZ(-row * offset);
+                    rotateX.setAngle(90);
+                    break;
+                case 4: // Left (Orange) - facing -X
+                    translate.setX(-1.5 * offset);
+                    translate.setY(row * offset);
+                    translate.setZ(col * offset);
+                    rotateY.setAngle(90);
+                    break;
+                case 5: // Back (Blue) - facing +Z
+                    translate.setX(-col * offset);
+                    translate.setY(row * offset);
+                    translate.setZ(1.5 * offset);
+                    break;
             }
+
+            tile.getTransforms().addAll(translate, rotateX, rotateY);
+            cubeGroup.getChildren().add(tile);
         }
     }
 
-    /**
-     * Maps your 1D state array → per-cubie face colors.
-     * Adjust index math to match your own array layout.
-     */
-    private Color[] resolveFaceColors(int x, int y, int z, int[] state) {
-        Color[] c = new Color[6]; // null = hidden internal face
+    private void initMouseControl(Group group, SubScene scene) {
+        Rotate xRotate = new Rotate(0, Rotate.X_AXIS);
+        Rotate yRotate = new Rotate(0, Rotate.Y_AXIS);
+        group.getTransforms().addAll(xRotate, yRotate);
 
-        if (y == 0) c[0] = colorForStateValue(state[getStateIndex(0, x, z)]); // Up    (face 0)
-        if (y == 2) c[1] = colorForStateValue(state[getStateIndex(3, x, z)]); // Down  (face 3)
-        if (z == 0) c[2] = colorForStateValue(state[getStateIndex(2, y, x)]); // Front (face 2)
-        if (z == 2) c[3] = colorForStateValue(state[getStateIndex(5, y, x)]); // Back  (face 5)
-        if (x == 0) c[4] = colorForStateValue(state[getStateIndex(4, y, z)]); // Left  (face 4)
-        if (x == 2) c[5] = colorForStateValue(state[getStateIndex(1, y, z)]); // Right (face 1)
+        final double[] anchorAngle = new double[2];
+        final double[] anchorPos = new double[2];
 
-        return c;
-    }
+        scene.setOnMousePressed(event -> {
+            anchorPos[0] = event.getSceneX();
+            anchorPos[1] = event.getSceneY();
+            anchorAngle[0] = xRotate.getAngle();
+            anchorAngle[1] = yRotate.getAngle();
+        });
 
-    private Color colorForStateValue(int value) {
-        if (value == 0) {
-            return null; // Internal face, not visible
-        }
-        if (value < 1 || value > FACE_COLORS.length) {
-            throw new IllegalArgumentException("Invalid cube state value: " + value);
-        }
-        return FACE_COLORS[value - 1];
-    }
-
-    /** Converts face + row + col → index in your 1D state array. Adapt to your layout. */
-    private int getStateIndex(int face, int row, int col) {
-        return face * 9 + row * 3 + col;
-    }
-
-    /** Call this after a move to refresh all cubie colors from new state */
-    public void updateFromState(int[] state) {
-        getChildren().clear();
-        buildCube(state);
+        scene.setOnMouseDragged(event -> {
+            xRotate.setAngle(anchorAngle[0] - (anchorPos[1] - event.getSceneY()));
+            yRotate.setAngle(anchorAngle[1] + (anchorPos[0] - event.getSceneX()));
+        });
     }
 }
