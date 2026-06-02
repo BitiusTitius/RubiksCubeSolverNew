@@ -29,11 +29,11 @@ public class RubiksCube {
     public static final String[] NOTATIONS = {"U", "R", "F", "D", "L", "B", "U'", "R'", "F'", "D'", "L'", "B'"};
     public ArrayList<String> moveHistory = new ArrayList<>();
 
-    public RubiksCube() { // Creates an unscrambled Rubik's Cube
+    public RubiksCube() { // Create an unscrambled Rubiks cube
         this.state = SOLVED_STATE.clone();
     }
 
-    public RubiksCube(int[] state) { // Creates a Rubik's Cube with a custom state
+    public RubiksCube(int[] state) { // Create a Rubiks cube with a predetermined scramble
         if (state.length != 54) {
             throw new IllegalArgumentException("State must have 54 elements.");
         }
@@ -43,23 +43,7 @@ public class RubiksCube {
         this.state = state.clone();
     }
 
-    public int[] getState() {
-        return state.clone();
-    }
-
-    public void printMoveHistory() {
-        System.out.println("Move History: " + moveHistory);
-    }
-
-    public void rotateFace(int face, int direction) { // 0 for up, 1 for right, 2 for front, 3 for down, 4 for left, 5 for back; direction: 1 for clockwise, -1 for counter-clockwise
-        if (face < 0 || face > 5) {
-            throw new IllegalArgumentException("Face must be between 0 and 5.");
-        }        
-        
-        if (direction != 1 && direction != -1) {
-            throw new IllegalArgumentException("Direction must be 1 (clockwise) or -1 (counter-clockwise).");
-        }
-
+    public void rotateFace(int face, int direction) { // Rotates face. 0 for up, 1 for right, 2 for front, 3 for down, 4 for left, 5 for back; direction: 1 for clockwise, -1 for counter-clockwise
         rotateFaceOnly(face, direction);
         rotateAdjacentSides(face, direction);
 
