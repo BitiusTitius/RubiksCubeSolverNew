@@ -15,7 +15,6 @@ import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.geometry.VPos;
 import javafx.scene.text.TextAlignment;
 

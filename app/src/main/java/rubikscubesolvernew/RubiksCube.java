@@ -17,18 +17,16 @@ public class RubiksCube {
     private ArrayList<String> moveHistory = new ArrayList<>();
 
     public RubiksCube() { // Create an unscrambled Rubiks cube
-        this.state = SOLVED_STATE.clone();
-        this.cube3D = new Cube();
-        this.cube3D.buildCube(state);
+        this(SOLVED_STATE.clone());
     }
 
-    public RubiksCube(int[] scramble) { // Create a Rubiks cube with a predetermined scramble
-        if (scramble.length != 54) {
+    public RubiksCube(int[] state) { // Create a Rubiks cube with a predetermined scramble
+        if (state.length != 54) {
             throw new IllegalArgumentException("State must have 54 elements.");
         }
-        this.state = scramble.clone();
+        this.state = state.clone();
         this.cube3D = new Cube();
-        this.cube3D.buildCube(scramble);
+        this.cube3D.buildCube(state);
     }
 
     public Cube getCube3D() {
@@ -37,6 +35,11 @@ public class RubiksCube {
 
     public int[] getState() {
         return state.clone();
+    }
+
+    public void printState() {
+        System.out.println("Current Cube State:");
+        System.out.println(java.util.Arrays.toString(state));
     }
 
     public String getMoveHistory() {
@@ -66,8 +69,6 @@ public class RubiksCube {
         if (this.cube3D != null) {
             this.cube3D.buildCube(state);
         }
-
-        printCube();
     }
 
     public void rotateFace(int face, int direction) {
@@ -127,7 +128,6 @@ public class RubiksCube {
         System.out.println("Current Cube State:");
         System.out.println(java.util.Arrays.toString(state));
 
-        // helper for centering labels over faces
         java.util.function.BiFunction<String,Integer,String> center = (s,w) -> {
             if (s == null) return "";
             if (s.length() >= w) return s;
@@ -136,15 +136,13 @@ public class RubiksCube {
             return " ".repeat(left) + s + " ".repeat(right);
         };
 
-        int tileWidth = 6; // format %d(%02d) plus trailing space -> approx 6
+        int tileWidth = 6;
         int faceWidth = tileWidth * 3;
         String indent = " ".repeat(18);
 
-        // Print label for Up face
         System.out.print(indent);
         System.out.println(center.apply("Up", faceWidth));
 
-        // Print Up face with indices
         for (int row = 0; row < 3; row++) {
             System.out.print("                  ");
             for (int col = 0; col < 3; col++) {
@@ -154,13 +152,11 @@ public class RubiksCube {
             System.out.println();
         }
 
-        // Print labels for Left, Front, Right, Back faces
         String[] midLabels = new String[]{"Left", "Front", "Right", "Back"};
         StringBuilder midLabelLine = new StringBuilder();
         for (String l : midLabels) midLabelLine.append(center.apply(l, faceWidth));
         System.out.println(midLabelLine.toString());
 
-        // Print Middle band: Left, Front, Right, Back faces with indices
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int idx = 4 * 9 + row * 3 + col;
@@ -181,11 +177,9 @@ public class RubiksCube {
             System.out.println();
         }
 
-        // Print Down face label then indices
         System.out.print(indent);
         System.out.println(center.apply("Down", faceWidth));
 
-        // Print Down face with indices
         for (int row = 0; row < 3; row++) {
             System.out.print("                  ");
             for (int col = 0; col < 3; col++) {

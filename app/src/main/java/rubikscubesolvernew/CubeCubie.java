@@ -1,14 +1,6 @@
 package rubikscubesolvernew;
 
 public class CubeCubie {
-    public enum PieceCorner {
-        URF, UFL, ULB, UBR, DFR, DLF, DBL, DRB // All corner pieces, ordered by their position in the solved state (URF is the corner with stickers on the Up, Right, and Front faces)
-    }
-
-    public enum PieceEdge {
-        UR, UF, UL, UB, DR, DF, DL, DB, FR, FL, BL, BR // All edge pieces, ordered by their position in the solved state (UR is the edge with stickers on the Up and Right faces)
-    }
-
     public byte[] cornerPerm = new byte[8]; // 8 corner pieces
     public byte[] cornerOri = new byte[8]; // Orientation of each corner piece (0, 1, or 2)
     public byte[] edgePerm = new byte[12]; // 12 edge pieces

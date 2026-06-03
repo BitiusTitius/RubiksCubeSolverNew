@@ -19,50 +19,22 @@ public class App extends Application {
         int[] scramble = {4, 5, 6, 2, 1, 2, 1, 6, 3, 4, 6, 5, 3, 2, 6, 5, 5, 6, 6, 1, 5, 6, 3, 1, 4, 4, 3, 6, 3, 1, 5, 4, 1, 1, 1, 2, 3, 3, 2, 2, 5, 5, 3, 3, 5, 1, 4, 2, 4, 6, 4, 4, 2, 2};
         // 1. Initialize your Rubik's Cube core logic
         RubiksCube cube = new RubiksCube();
+        MoveTables.init();
 
-        cube.printCube();
-
-        CubeCubie cubie = cube.toCubie();
-        /*System.out.println("Corner Permutation: " + java.util.Arrays.toString(cubie.cornerPerm));
-        System.out.println("Corner Orientation: " + java.util.Arrays.toString(cubie.cornerOri));
-        System.out.println("Edge Permutation: " + java.util.Arrays.toString(cubie.edgePerm));
-        System.out.println("Edge Orientation: " + java.util.Arrays.toString(cubie.edgeOri));*/
-
-        CubeFace face = cubie.toFacelet();
-        System.out.println("Facelet representation");
-        System.out.println(java.util.Arrays.toString(face.face));
+        cube.rotate("R");
+        cube.rotate("U");
 
         int[] original = cube.getState();
-        int[] recovered = RubiksCube.fromCubie(cubie);
+        int[] recovered = RubiksCube.fromCubie(cube.toCubie());
 
         System.out.println(Arrays.equals(original, recovered));
 
-        CubeFace cf = cube.toFacelet();
+        Testing.testScrambleTracking();
+        Testing.testMoveTablePeriodicity();
 
-        System.out.println("Corner sticker check on SOLVED cube:");
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 3; j++) {
-                int faceletIdx = CubeFace.CORNER_FACELETS[i][j];
-                int expectedColor = CubeFace.CORNER_COLORS[i][j];
-                int actualColor = cf.face[faceletIdx];
-                if (actualColor != expectedColor) {
-                    System.out.println("Corner " + i + " sticker " + j +
-                        ": facelet=" + faceletIdx +
-                        " expected=" + expectedColor +
-                        " got=" + actualColor);
-                }
-            }
-        }
-        System.out.println("Done");
-
-
-        // 2. Create the main UI layout window
         BorderPane root = new BorderPane();
-
-        // 3. Extract the 3D visual component from the cube and put it in the center
         root.setCenter(cube.getCube3D());
 
-        // 4. Create a button control panel for testing standard notations (U, R, F, etc.)
         FlowPane buttonPanel = new FlowPane();
         buttonPanel.setAlignment(Pos.CENTER);
         buttonPanel.setHgap(10);
@@ -89,7 +61,6 @@ public class App extends Application {
 
         root.setBottom(buttonPanel);
 
-        // 5. Setup and display the window stage
         Scene scene = new Scene(root, 900, 700);
         primaryStage.setTitle("3D Rubik's Cube Simulator");
         primaryStage.setScene(scene);
