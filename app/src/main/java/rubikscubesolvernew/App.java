@@ -18,19 +18,18 @@ public class App extends Application {
         int[] solvedState = {1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 3, 3, 4, 4, 4, 6, 4, 4, 6, 4, 4, 6, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 6, 6, 1, 6, 6};
         int[] scramble = {4, 5, 6, 2, 1, 2, 1, 6, 3, 4, 6, 5, 3, 2, 6, 5, 5, 6, 6, 1, 5, 6, 3, 1, 4, 4, 3, 6, 3, 1, 5, 4, 1, 1, 1, 2, 3, 3, 2, 2, 5, 5, 3, 3, 5, 1, 4, 2, 4, 6, 4, 4, 2, 2};
         // 1. Initialize your Rubik's Cube core logic
-        RubiksCube cube = new RubiksCube();
-        MoveTables.init();
+        PruningTables.init();
 
-        cube.rotate("R");
+        Test.testSolver();
+        RubiksCube cube = new RubiksCube();
+
+        /*cube.rotate("R");
         cube.rotate("U");
 
         int[] original = cube.getState();
         int[] recovered = RubiksCube.fromCubie(cube.toCubie());
 
-        System.out.println(Arrays.equals(original, recovered));
-
-        Testing.testScrambleTracking();
-        Testing.testMoveTablePeriodicity();
+        System.out.println(Arrays.equals(original, recovered));*/
 
         BorderPane root = new BorderPane();
         root.setCenter(cube.getCube3D());

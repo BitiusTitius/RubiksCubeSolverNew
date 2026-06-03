@@ -12,7 +12,11 @@ public class RubiksCube {
         5, 5, 5, 5, 5, 5, 5, 5, 5, // Left face (Orange)
         6, 6, 6, 6, 6, 6, 6, 6, 6   // Back face (Blue)
     };
-    public static final String[] NOTATIONS = {"U", "R", "F", "D", "L", "B", "U'", "R'", "F'", "D'", "L'", "B'"};
+    public static final String[] NOTATIONS = {
+        "U", "R", "F", "D", "L", "B", 
+        "U'", "R'", "F'", "D'", "L'", "B'",
+        "U2", "R2", "F2", "D2", "L2", "B2"
+    };
     private Cube cube3D;
     private ArrayList<String> moveHistory = new ArrayList<>();
 
@@ -48,15 +52,17 @@ public class RubiksCube {
 
     public void rotate(String notation) {
         int moveIndex = java.util.Arrays.asList(NOTATIONS).indexOf(notation);
-
-        if (moveIndex == -1) {
-            throw new IllegalArgumentException("Invalid notation: " + notation);
-        }
+        if (moveIndex == -1) throw new IllegalArgumentException("Invalid notation: " + notation);
 
         int face = moveIndex % 6;
-        int direction = (moveIndex < 6) ? 1 : -1;
-
-        rotate(face, direction);
+        if (moveIndex >= 12) {
+            // Double move — apply twice
+            rotate(face, 1);
+            rotate(face, 1);
+        } else {
+            int direction = (moveIndex < 6) ? 1 : -1;
+            rotate(face, direction);
+        }
     }
 
     public void rotate(int face, int direction) { // face: 0=U,1=R,2=F,3=D,4=L,5=B; direction: 1=clockwise, -1=counter-clockwise
