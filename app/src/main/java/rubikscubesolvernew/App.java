@@ -1,20 +1,60 @@
 package rubikscubesolvernew;
 
+import java.util.Arrays;
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.input.MouseButton;
 
 public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        int[] scramble = {5, 5, 3, 1, 1, 6, 1, 1, 5, 3, 2, 2, 1, 2, 2, 1, 2, 2, 3, 3, 1, 3, 3, 1, 4, 4, 1, 4, 4, 2, 4, 4, 3, 5, 5, 6, 4, 2, 2, 4, 5, 5, 6, 5, 5, 4, 3, 3, 6, 6, 6, 6, 6, 6};
+        int[] solvedState = {1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 3, 3, 4, 4, 4, 6, 4, 4, 6, 4, 4, 6, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 6, 6, 1, 6, 6};
+        int[] scramble = {4, 5, 6, 2, 1, 2, 1, 6, 3, 4, 6, 5, 3, 2, 6, 5, 5, 6, 6, 1, 5, 6, 3, 1, 4, 4, 3, 6, 3, 1, 5, 4, 1, 1, 1, 2, 3, 3, 2, 2, 5, 5, 3, 3, 5, 1, 4, 2, 4, 6, 4, 4, 2, 2};
         // 1. Initialize your Rubik's Cube core logic
-        RubiksCube cube = new RubiksCube(scramble);
+        RubiksCube cube = new RubiksCube();
+
+        cube.printCube();
+
+        CubeCubie cubie = cube.toCubie();
+        /*System.out.println("Corner Permutation: " + java.util.Arrays.toString(cubie.cornerPerm));
+        System.out.println("Corner Orientation: " + java.util.Arrays.toString(cubie.cornerOri));
+        System.out.println("Edge Permutation: " + java.util.Arrays.toString(cubie.edgePerm));
+        System.out.println("Edge Orientation: " + java.util.Arrays.toString(cubie.edgeOri));*/
+
+        CubeFace face = cubie.toFacelet();
+        System.out.println("Facelet representation");
+        System.out.println(java.util.Arrays.toString(face.face));
+
+        int[] original = cube.getState();
+        int[] recovered = RubiksCube.fromCubie(cubie);
+
+        System.out.println(Arrays.equals(original, recovered));
+
+        CubeFace cf = cube.toFacelet();
+
+        System.out.println("Corner sticker check on SOLVED cube:");
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 3; j++) {
+                int faceletIdx = CubeFace.CORNER_FACELETS[i][j];
+                int expectedColor = CubeFace.CORNER_COLORS[i][j];
+                int actualColor = cf.face[faceletIdx];
+                if (actualColor != expectedColor) {
+                    System.out.println("Corner " + i + " sticker " + j +
+                        ": facelet=" + faceletIdx +
+                        " expected=" + expectedColor +
+                        " got=" + actualColor);
+                }
+            }
+        }
+        System.out.println("Done");
+
 
         // 2. Create the main UI layout window
         BorderPane root = new BorderPane();
@@ -29,14 +69,22 @@ public class App extends Application {
         buttonPanel.setVgap(10);
         buttonPanel.setStyle("-fx-padding: 20; -fx-background-color: #333333;");
 
-        // Loop through your NOTATIONS array to dynamically generate buttons
-        for (String notation : RubiksCube.NOTATIONS) {
-            Button btn = new Button(notation);
-            btn.setStyle("-fx-font-size: 14px; -fx-min-width: 50px;");
+        String[] notations = {
+            "U", "R", "F", "D", "L", "B", 
+        };
+
+        for (String n : notations) {
+            Button button = new Button(n);
+            button.setStyle("-fx-font-size: 14px; -fx-min-width: 50px;");
             
-            // When clicked, rotate the logic cube (which automatically refreshes the 3D view)
-            btn.setOnAction(e -> cube.rotateFace(notation));
-            buttonPanel.getChildren().add(btn);
+            button.setOnMouseClicked(e -> {
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    cube.rotate(n);
+                } else if (e.getButton() == MouseButton.SECONDARY) {
+                    cube.rotate(n + "'");
+                }
+            });
+            buttonPanel.getChildren().add(button);
         }
 
         root.setBottom(buttonPanel);
