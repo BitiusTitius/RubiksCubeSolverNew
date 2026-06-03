@@ -63,7 +63,7 @@ public class Testing {
 
         // 2. Do the exact same sequence using only integer Lookups starting from 0 (solved)
         // Translate string moves to your 0-17 indices
-        int[] scrambleIndices = {1, 0, 7, 8, 13, 6}; // R, U, R', F, R2, U'
+        int[] scrambleIndices = {1, 0, 7, 8, 13, 16}; // R, U, R', F, R2, U'
         
         int tableTwist = 0;
         int tableFlip = 0;
