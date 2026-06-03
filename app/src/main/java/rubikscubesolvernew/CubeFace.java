@@ -7,10 +7,10 @@ public class CubeFace {
         { 6, 18, 38}, // UFL: U[6],  F[18], L[38]
         { 0, 36, 47}, // ULB: U[0],  L[36], B[47]
         { 2, 45, 11}, // UBR: U[2],  B[45], R[11]
-        {29, 17, 26}, // DFR: swap → D[29], R[17], F[26]
-        {27, 24, 44}, // DLF: swap → D[27], F[24], L[44]
-        {35, 42, 53}, // DBL: swap → D[35], L[42], B[53]
-        {33, 51, 15}, // DRB: swap → D[33], B[51], R[15]
+        {29, 17, 26}, // DFR: D[29], R[17], F[26]
+        {27, 24, 44}, // DLF: D[27], F[24], L[44]
+        {35, 42, 53}, // DBL: D[35], L[42], B[53]
+        {33, 51, 15}, // DRB: D[33], B[51], R[15]
     };
     public static final int[][] CORNER_COLORS = {
         {1, 2, 3},   // URF
@@ -34,7 +34,7 @@ public class CubeFace {
         {23, 12}, // FR: F[5]=23→3, R[3]=12→2
         {21, 41}, // FL: F[3]=21→3, L[5]=41→5
         {39, 50}, // BL: L[3]=39→5, B[5]=50→6
-        {14, 48},
+        {14, 48}, // BR: B[3]=48→6, R[5]=14→2
     };
     public static final int[][] EDGE_COLORS = {
         {1, 2},   // UR
@@ -63,28 +63,39 @@ public class CubeFace {
     public CubeCubie toCubie() {
         CubeCubie cubie = new CubeCubie();
 
-        for (int i = 0; i < 8; i++) { // For each corner position
-            byte ori = 0;
-
-            for (ori = 0; ori < 3; ori++) {
-                if(face[CORNER_FACELETS[i][0]] == 1 && face[CORNER_FACELETS[i][ori]] == 4) {
-                    break;
-                }
-
-                byte color1 = face[CORNER_FACELETS[i][(ori) % 3]];
+        // Process corners
+        for (int i = 0; i < 8; i++) {
+            boolean found = false;
+            
+            // Try all 3 possible orientations
+            for (byte ori = 0; ori < 3 && !found; ori++) {
+                // Read the three colors at this corner position with this orientation
+                byte color1 = face[CORNER_FACELETS[i][ori % 3]];
                 byte color2 = face[CORNER_FACELETS[i][(ori + 1) % 3]];
                 byte color3 = face[CORNER_FACELETS[i][(ori + 2) % 3]];
 
+                // Try to match against all corner pieces
                 for (byte pieceId = 0; pieceId < 8; pieceId++) {
-                    if (color1 == CORNER_COLORS[pieceId][0] && color2 == CORNER_COLORS[pieceId][1] && color3 == CORNER_COLORS[pieceId][2]) {
+                    if (color1 == CORNER_COLORS[pieceId][0] && 
+                        color2 == CORNER_COLORS[pieceId][1] && 
+                        color3 == CORNER_COLORS[pieceId][2]) {
                         cubie.cornerPerm[i] = pieceId;
                         cubie.cornerOri[i] = ori;
+                        found = true;
                         break;
                     }
                 }
             }
+            
+            if (!found) {
+                System.err.println("WARNING: Could not identify corner at position " + i);
+                System.err.println("  Facelets: " + CORNER_FACELETS[i][0] + "=" + face[CORNER_FACELETS[i][0]] + 
+                                   ", " + CORNER_FACELETS[i][1] + "=" + face[CORNER_FACELETS[i][1]] + 
+                                   ", " + CORNER_FACELETS[i][2] + "=" + face[CORNER_FACELETS[i][2]]);
+            }
         }
 
+        // Process edges
         for (int i = 0; i < 12; i++) {
             boolean found = false;
 
@@ -106,6 +117,12 @@ public class CubeFace {
                         break;
                     }
                 }
+            }
+            
+            if (!found) {
+                System.err.println("WARNING: Could not identify edge at position " + i);
+                System.err.println("  Facelets: " + EDGE_FACELETS[i][0] + "=" + face[EDGE_FACELETS[i][0]] + 
+                                   ", " + EDGE_FACELETS[i][1] + "=" + face[EDGE_FACELETS[i][1]]);
             }
         }
 
