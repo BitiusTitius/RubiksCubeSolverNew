@@ -50,6 +50,52 @@ public class RubiksCube {
         return String.join(" ", moveHistory);
     }
 
+    /**
+     * Converts this cube's int[54] state into the byte[6][9] format that
+     * TableGenerator / SolveCube expect.
+     *
+     * RubiksCube face order  : 0=Up, 1=Right, 2=Front, 3=Down, 4=Left, 5=Back
+     * TableGenerator face order: 0=Up, 1=Left,  2=Front, 3=Right, 4=Back, 5=Down
+     *
+     * RubiksCube color values : 1=White,2=Red,  3=Green, 4=Yellow,5=Orange,6=Blue
+     * TableGenerator color values: 0=White,1=Orange,2=Green,3=Red,   4=Blue, 5=Yellow
+     */
+    public byte[][] toSolverState() {
+        // Map RubiksCube face index -> TableGenerator face index
+        // RC:0=Up->TG:0, RC:1=Right->TG:3, RC:2=Front->TG:2,
+        // RC:3=Down->TG:5, RC:4=Left->TG:1, RC:5=Back->TG:4
+        int[] faceMap = {0, 3, 2, 5, 1, 4};
+
+        // Map RubiksCube color value -> TableGenerator color value
+        // RC:1(White)->TG:0, RC:2(Red)->TG:3, RC:3(Green)->TG:2,
+        // RC:4(Yellow)->TG:5, RC:5(Orange)->TG:1, RC:6(Blue)->TG:4
+        int[] colorMap = {-1, 0, 3, 2, 5, 1, 4}; // index by RC color value (1-6)
+
+        byte[][] solverCube = new byte[6][9];
+        for (int rcFace = 0; rcFace < 6; rcFace++) {
+            int tgFace = faceMap[rcFace];
+            for (int cell = 0; cell < 9; cell++) {
+                int rcColor = state[rcFace * 9 + cell];
+                solverCube[tgFace][cell] = (byte) colorMap[rcColor];
+            }
+        }
+        return solverCube;
+    }
+
+    /**
+     * Applies a solution string from SolveCube (which uses 'i' for inverse)
+     * to this cube (which uses apostrophe for inverse).
+     */
+    public void applySolution(String solution) {
+        // SolveCube outputs "i" for inverse; RubiksCube.rotate() expects "'"
+        String converted = solution.trim().replace("i", "'");
+        for (String move : converted.split("\\s+")) {
+            if (!move.isEmpty()) {
+                rotate(move);
+            }
+        }
+    }
+
     public void rotate(String notation) {
         int moveIndex = java.util.Arrays.asList(NOTATIONS).indexOf(notation);
         if (moveIndex == -1) throw new IllegalArgumentException("Invalid notation: " + notation);
@@ -74,6 +120,13 @@ public class RubiksCube {
 
         if (this.cube3D != null) {
             this.cube3D.buildCube(state);
+        }
+
+        if (java.util.Arrays.equals(state, SOLVED_STATE)) {
+            System.out.println("=== CUBE SOLVED! ===");
+            System.out.println("Move history: " + getMoveHistory());
+            System.out.println("Total moves: " + moveHistory.size());
+            printCube();
         }
     }
 
@@ -194,30 +247,5 @@ public class RubiksCube {
             }
             System.out.println();
         }
-    }
-
-    public CubeCubie toCubie() {
-        CubeFace face = new CubeFace();
-        for (int i = 0; i < 54; i++) {
-            face.face[i] = (byte) this.state[i];
-        }
-        return face.toCubie();
-    }
-
-    public static int[] fromCubie(CubeCubie cubie) {
-        CubeFace face = cubie.toFacelet();
-        int[] state = new int[54];
-        for (int i = 0; i < 54; i++) {
-            state[i] = face.face[i];
-        }
-        return state;
-    }
-
-    public CubeFace toFacelet() {
-        CubeFace face = new CubeFace();
-        for (int i = 0; i < 54; i++) {
-            face.face[i] = (byte) this.state[i];
-        }
-        return face;
     }
 }
