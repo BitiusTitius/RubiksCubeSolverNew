@@ -193,7 +193,40 @@ public class Test {
 
     static void testSolver() {
         System.out.println("\n=== Solver Test ===");
-        String[][] scrambles = {
+        RubiksCube cube = new RubiksCube();
+        cube.rotate("R"); cube.rotate("U");
+        CubeCubie c = cube.toCubie();
+        int[] solution = KociembaAlgorithm.solve(c);
+        List<String> notation = KociembaAlgorithm.toNotation(solution);
+        System.out.println("Raw solution moves: " + notation);
+
+        RubiksCube verify = new RubiksCube();
+        verify.rotate("R"); verify.rotate("U");
+        for (String m : notation) {
+            verify.rotate(m);
+            System.out.println("After " + m + " - solved? " +
+                java.util.Arrays.equals(verify.getState(), new RubiksCube().getState()));
+        }
+
+        RubiksCube p1check = new RubiksCube();
+        p1check.rotate("R"); p1check.rotate("U");
+        CubeCubie p1c = p1check.toCubie();
+        System.out.println("\nBefore solution:");
+        System.out.println("  twist=" + CubeCoord.getTwist(p1c) +
+                        " flip=" + CubeCoord.getFlip(p1c) +
+                        " udslice=" + CubeCoord.getUDSlice(p1c));
+        for (String m : notation) {
+            p1check.rotate(m);
+            p1c = p1check.toCubie();
+            System.out.println("After " + m +
+                ": twist=" + CubeCoord.getTwist(p1c) +
+                " flip=" + CubeCoord.getFlip(p1c) +
+                " udslice=" + CubeCoord.getUDSlice(p1c) +
+                " cPerm=" + CubeCoord.getCornerPerm(p1c) +
+                " ePerm=" + CubeCoord.getEdgePerm(p1c) +
+                " udSliceP=" + CubeCoord.getUDSlicePerm(p1c));
+    }
+        /*String[][] scrambles = {
             {"R", "U"},                          // 2 moves
             {"R", "U", "R'", "U'"},             // 4 moves
             {"R", "U", "R'", "U'",
@@ -226,6 +259,6 @@ public class Test {
                 + " → solution: " + notation 
                 + " (" + solution.length + " moves, " + elapsed + "ms) " 
                 + (solved ? "PASS" : "FAIL - cube not solved!"));
-        }
+        }*/
     }
 }

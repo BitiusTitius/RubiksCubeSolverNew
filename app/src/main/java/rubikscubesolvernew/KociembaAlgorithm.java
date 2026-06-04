@@ -7,7 +7,7 @@ public class KociembaAlgorithm {
 
     private static final int MAX_PHASE1 = 12;
     private static final int MAX_PHASE2 = 18;
-    private static final int SOLVED_UDSLICE = 220;
+    private static final int SOLVED_UDSLICE = 494;
 
     // Full solution found
     private static int[] bestSolution;
@@ -73,19 +73,13 @@ public class KociembaAlgorithm {
     }
 
     private static boolean searchPhase2(
-            int cPerm, int ePerm, int udSliceP,
-            int phase1Length, int[] phase1Moves) {
+        int cPerm, int ePerm, int udSliceP,
+        int phase1Length, int[] moves) {
 
-        // Check if Phase 2 is already solved
-        if (cPerm == 0 && ePerm == 0 && udSliceP == 0) {
-            bestSolution = java.util.Arrays.copyOf(phase1Moves, phase1Length);
-            return true;
-        }
+        int[] p2moves = java.util.Arrays.copyOf(moves, MAX_PHASE1 + MAX_PHASE2);
 
-        int[] moves = java.util.Arrays.copyOf(phase1Moves, phase1Length + MAX_PHASE2);
-
-        for (int depth = 1; depth <= MAX_PHASE2 - phase1Length; depth++) {
-            if (searchPhase2IDA(cPerm, ePerm, udSliceP, phase1Length, phase1Length, depth, moves)) {
+        for (int depth = 0; depth <= MAX_PHASE2 - phase1Length; depth++) {
+            if (searchPhase2IDA(cPerm, ePerm, udSliceP, phase1Length, phase1Length, depth, p2moves)) {
                 return true;
             }
         }
@@ -101,14 +95,14 @@ public class KociembaAlgorithm {
             return true;
         }
 
+        int remainingDepth = depth - phase1Length;
         int prune = Math.max(
             PruningTables.cornerPermUDSlicePermPrune[cPerm * MoveTables.N_UDSLICEP + udSliceP],
             PruningTables.edgePermUDSlicePermPrune[ePerm * MoveTables.N_UDSLICEP + udSliceP]
         );
-        if ((depth - phase1Length) + prune > maxDepth) return false;
+        if (remainingDepth + prune > maxDepth) return false;
 
         for (int m : PruningTables.PHASE2_MOVES) {
-            // Avoid redundant moves
             if (depth > phase1Length && sameAxis(moves[depth - 1], m)) continue;
 
             moves[depth] = m;

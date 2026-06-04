@@ -23,6 +23,12 @@ public class App extends Application {
         Test.testSolver();
         RubiksCube cube = new RubiksCube();
 
+        CubeCubie test = new CubeCubie();
+        CubeCoord.setUDSlice(test, 494);
+        System.out.println("udslice=494 edgePerm: " + java.util.Arrays.toString(test.edgePerm));
+        CubeCoord.setUDSlice(test, 220);
+        System.out.println("udslice=220 edgePerm: " + java.util.Arrays.toString(test.edgePerm));
+
         /*cube.rotate("R");
         cube.rotate("U");
 

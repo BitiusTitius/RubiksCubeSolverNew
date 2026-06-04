@@ -66,8 +66,7 @@ public class PruningTables {
         byte[] table = new byte[SIZE];
         java.util.Arrays.fill(table, (byte) -1);
 
-        // Solved: udslice=220, twist=0
-        int solvedUDSlice = 220, solvedTwist = 0;
+        int solvedUDSlice = 494, solvedTwist = 0;
         table[solvedUDSlice * MoveTables.N_TWIST + solvedTwist] = 0;
 
         ArrayDeque<Integer> queue = new ArrayDeque<>();
