@@ -17,10 +17,9 @@ public class CubeMoves {
         // Twist pattern: +2, +1, +2, +1 (alternating as corner enters/leaves R face)
         CubeCubie R = new CubeCubie();
         R.cornerPerm = new byte[]{4, 1, 2, 0,  7, 5, 6, 3};
-        R.cornerOri  = new byte[]{1, 0, 0, 2,  2, 0, 0, 1};
-        // Edges cycle: UR(0)→FR(8)→DR(4)→BR(11)→UR(0), no flip
+        R.cornerOri  = new byte[]{2, 0, 0, 1,  1, 0, 0, 2};
         R.edgePerm   = new byte[]{8, 1, 2, 3,  11, 5, 6, 7,  4, 9, 10, 0};
-        R.edgeOri    = new byte[]{0, 0, 0, 0,  1, 0, 0, 0,  0, 0, 0, 1};
+        R.edgeOri    = new byte[]{0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
         MOVE_CUBIES[1] = R;
 
         // ==================== F ====================
@@ -28,10 +27,9 @@ public class CubeMoves {
         // Twist pattern: +1, +2, +1, +2
         CubeCubie F = new CubeCubie();
         F.cornerPerm = new byte[]{1, 5, 2, 3,  0, 4, 6, 7};
-        F.cornerOri  = new byte[]{2, 1, 0, 0,  1, 2, 0, 0};
-        // Edges cycle: UF(1)→FL(9)→DF(5)→FR(8)→UF(1), all flipped
+        F.cornerOri  = new byte[]{1, 2, 0, 0,  2, 1, 0, 0};
         F.edgePerm   = new byte[]{0, 9, 2, 3,  4, 8, 6, 7,  1, 5, 10, 11};
-        F.edgeOri    = new byte[]{0, 1, 0, 0,  0, 1, 0, 0,  1, 1,  0,  0};
+        F.edgeOri    = new byte[]{0, 1, 0, 0,  0, 1, 0, 0,  1, 1,  0,  0}; 
         MOVE_CUBIES[2] = F;
 
         // ==================== D ====================
@@ -49,10 +47,9 @@ public class CubeMoves {
         // Twist pattern: +1, +2, +1, +2
         CubeCubie L = new CubeCubie();
         L.cornerPerm = new byte[]{0, 2, 6, 3,  4, 1, 5, 7};
-        L.cornerOri  = new byte[]{0, 2, 1, 0,  0, 1, 2, 0};
-        // Edges cycle: UL(2)→BL(10)→DL(6)→FL(9)→UL(2), no flip
+        L.cornerOri  = new byte[]{0, 1, 2, 0,  0, 2, 1, 0};
         L.edgePerm   = new byte[]{0, 1, 10, 3,  4, 5, 9, 7,  8, 2, 6, 11};
-        L.edgeOri    = new byte[]{0, 0, 1, 0,  0, 0, 0, 0,  0, 0, 1, 0};
+        L.edgeOri    = new byte[]{0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0,  0};
         MOVE_CUBIES[4] = L;
 
         // ==================== B ====================
@@ -60,10 +57,9 @@ public class CubeMoves {
         // Twist pattern: +1, +2, +1, +2
         CubeCubie B = new CubeCubie();
         B.cornerPerm = new byte[]{0, 1, 3, 7,  4, 5, 2, 6};
-        B.cornerOri  = new byte[]{0, 0, 2, 1,  0, 0, 1, 2};
-        // Edges cycle: UB(3)→BR(11)→DB(7)→BL(10)→UB(3), all flipped
+        B.cornerOri  = new byte[]{0, 0, 1, 2,  0, 0, 2, 1};
         B.edgePerm   = new byte[]{0, 1, 2, 11,  4, 5, 6, 10,  8, 9, 3, 7};
-        B.edgeOri    = new byte[]{0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0};
+        B.edgeOri    = new byte[]{0, 0, 0, 1,  0, 0, 0, 1,  0, 0, 1, 1};
         MOVE_CUBIES[5] = B;
 
         // ==================== INVERSES (U', R', F', D', L', B') ====================

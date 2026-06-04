@@ -261,4 +261,131 @@ public class Test {
                 + (solved ? "PASS" : "FAIL - cube not solved!"));
         }*/
     }
+
+    static void diagnoseMoveOrientations() {
+        System.out.println("=== Edge Orientation Sanity Check ===");
+        String[] names = {"U","R","F","D","L","B"};
+        
+        for (int i = 0; i < 6; i++) {
+            // Single move on identity: only F and B should flip any edges
+            CubeCubie c = new CubeCubie();
+            c.multiply(CubeMoves.MOVE_CUBIES[i]);
+            int flip = CubeCoord.getFlip(c);
+            
+            // Double move: NO move should flip any edges (flip^2 = 0)
+            CubeCubie c2 = new CubeCubie();
+            c2.multiply(CubeMoves.MOVE_CUBIES[i]);
+            c2.multiply(CubeMoves.MOVE_CUBIES[i]);
+            int flip2 = CubeCoord.getFlip(c2);
+            
+            System.out.println(names[i] + 
+                "  flip=" + flip + 
+                "  " + names[i] + "2 flip=" + flip2 +
+                (i == 2 || i == 5 ? "  (F/B: flip expected nonzero)" : "  (should be 0)") +
+                (flip2 != 0 ? "  *** DOUBLE MOVE FLIP BUG ***" : ""));
+        }
+        
+        System.out.println("\n=== Twist Sanity Check ===");
+        for (int i = 0; i < 6; i++) {
+            // U and D should never twist corners
+            CubeCubie c = new CubeCubie();
+            c.multiply(CubeMoves.MOVE_CUBIES[i]);
+            int twist = CubeCoord.getTwist(c);
+            System.out.println(names[i] + "  twist=" + twist +
+                (i == 0 || i == 3 ? "  (U/D: should be 0)" : ""));
+        }
+    }
+
+    static void diagnoseFlipConsistency() {
+        System.out.println("=== Flip Consistency: Move Table vs State Rotation ===");
+        String[] names = {"U","R","F","D","L","B"};
+        
+        for (int i = 0; i < 6; i++) {
+            // Via move table
+            CubeCubie c1 = new CubeCubie();
+            c1.multiply(CubeMoves.MOVE_CUBIES[i]);
+            int flipFromTable = CubeCoord.getFlip(c1);
+            
+            // Via state rotation → toCubie
+            RubiksCube cube = new RubiksCube();
+            cube.rotate(names[i]);
+            int flipFromState = CubeCoord.getFlip(cube.toCubie());
+            
+            boolean match = flipFromTable == flipFromState;
+            System.out.println(names[i] + 
+                "  table=" + flipFromTable + 
+                "  state=" + flipFromState + 
+                "  " + (match ? "OK" : "*** MISMATCH ***"));
+        }
+        
+        System.out.println("\n=== Twist Consistency: Move Table vs State Rotation ===");
+        for (int i = 0; i < 6; i++) {
+            CubeCubie c1 = new CubeCubie();
+            c1.multiply(CubeMoves.MOVE_CUBIES[i]);
+            int twistFromTable = CubeCoord.getTwist(c1);
+            
+            RubiksCube cube = new RubiksCube();
+            cube.rotate(names[i]);
+            int twistFromState = CubeCoord.getTwist(cube.toCubie());
+            
+            boolean match = twistFromTable == twistFromState;
+            System.out.println(names[i] + 
+                "  table=" + twistFromTable + 
+                "  state=" + twistFromState + 
+                "  " + (match ? "OK" : "*** MISMATCH ***"));
+        }
+    }
+
+    static void diagnoseMapping() {
+        System.out.println("=== Corner Facelet/Color Mapping Check ===");
+        // In the solved state, corner i should have pieceId=i and ori=0
+        RubiksCube solved = new RubiksCube();
+        CubeCubie c = solved.toCubie();
+        System.out.println("Solved state cornerPerm: " + java.util.Arrays.toString(c.cornerPerm));
+        System.out.println("Solved state cornerOri:  " + java.util.Arrays.toString(c.cornerOri));
+        System.out.println("Solved state edgePerm:   " + java.util.Arrays.toString(c.edgePerm));
+        System.out.println("Solved state edgeOri:    " + java.util.Arrays.toString(c.edgeOri));
+        
+        System.out.println("\n=== Single Move Facelet Check ===");
+        String[] names = {"U","R","F","D","L","B"};
+        for (int i = 0; i < 6; i++) {
+            RubiksCube cube = new RubiksCube();
+            cube.rotate(names[i]);
+            CubeCubie cc = cube.toCubie();
+            System.out.println(names[i] + " cornerPerm=" + java.util.Arrays.toString(cc.cornerPerm));
+            System.out.println(names[i] + " cornerOri= " + java.util.Arrays.toString(cc.cornerOri));
+            System.out.println(names[i] + " edgePerm=  " + java.util.Arrays.toString(cc.edgePerm));
+            System.out.println(names[i] + " edgeOri=   " + java.util.Arrays.toString(cc.edgeOri));
+            System.out.println();
+        }
+    }
+
+    static void diagnoseStateSides() {
+    System.out.println("=== R move: which facelets changed ===");
+    RubiksCube cube = new RubiksCube();
+    int[] before = cube.getState();
+    cube.rotate("R");
+    int[] after = cube.getState();
+    
+    for (int i = 0; i < 54; i++) {
+        if (before[i] != after[i]) {
+            System.out.println("  [" + i + "] " + before[i] + " -> " + after[i] + 
+                "  (face " + i/9 + ", pos " + i%9 + ")");
+        }
+    }
+    
+    // Now check which edge facelets the changed indices correspond to
+    System.out.println("\nEdge facelet involvement:");
+    int[][] ef = CubeFace.EDGE_FACELETS;
+    for (int e = 0; e < 12; e++) {
+        boolean f0changed = before[ef[e][0]] != after[ef[e][0]];
+        boolean f1changed = before[ef[e][1]] != after[ef[e][1]];
+        if (f0changed || f1changed) {
+            System.out.println("  Edge " + e + " " + java.util.Arrays.toString(ef[e]) +
+                " colors " + java.util.Arrays.toString(CubeFace.EDGE_COLORS[e]) +
+                ": f0=" + before[ef[e][0]] + "->" + after[ef[e][0]] +
+                " f1=" + before[ef[e][1]] + "->" + after[ef[e][1]]);
+        }
+    }
+}
 }
